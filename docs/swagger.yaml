@@ -1,0 +1,321 @@
+basePath: /
+definitions:
+  fiber.Map:
+    additionalProperties: true
+    type: object
+  github_com_faridlan_inventory-api_internal_delivery_http_dto.PatchProductsIdJSONBody:
+    properties:
+      is_available:
+        description: |-
+          Diberi contoh false, karena biasanya endpoint PATCH digunakan
+          oleh FE saat tombol "Setel ke Habis" diklik.
+        example: false
+        type: boolean
+    required:
+    - is_available
+    type: object
+  github_com_faridlan_inventory-api_internal_delivery_http_dto.ProductRequest:
+    properties:
+      is_available:
+        example: true
+        type: boolean
+      name:
+        example: Kemeja Taktikal Hitam
+        type: string
+      price:
+        example: 150000
+        minimum: 0
+        type: number
+      sizes:
+        example:
+        - M
+        - L
+        - XL
+        items:
+          type: string
+        type: array
+      stock:
+        example: 50
+        minimum: 0
+        type: integer
+    required:
+    - name
+    - price
+    type: object
+  github_com_faridlan_inventory-api_internal_delivery_http_dto.ProductResponse:
+    properties:
+      created_at:
+        example: "2026-05-06T12:00:00Z"
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      is_available:
+        example: true
+        type: boolean
+      name:
+        example: Kemeja Taktikal Hitam
+        type: string
+      price:
+        example: 150000
+        type: number
+      sizes:
+        example:
+        - M
+        - L
+        - XL
+        items:
+          type: string
+        type: array
+      stock:
+        example: 50
+        type: integer
+      updated_at:
+        example: "2026-05-06T12:00:00Z"
+        type: string
+    type: object
+  github_com_faridlan_inventory-api_internal_utils.ErrorResponse:
+    properties:
+      detail:
+        type: string
+      error:
+        example: pesan error
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API untuk manajemen inventori produk pakaian. Dibuat sebagai bahan
+    latihan integrasi Frontend.
+  title: Inventory API
+  version: "1.0"
+paths:
+  /api/products:
+    get:
+      consumes:
+      - application/json
+      description: Mengambil daftar semua produk pakaian yang tersedia di inventori
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/fiber.Map'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_faridlan_inventory-api_internal_delivery_http_dto.ProductResponse'
+                  type: array
+                message:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+      summary: Mendapatkan semua produk
+      tags:
+      - Products
+    post:
+      consumes:
+      - application/json
+      description: Menyimpan data produk pakaian baru ke dalam database
+      parameters:
+      - description: Payload Produk Baru
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_faridlan_inventory-api_internal_delivery_http_dto.ProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/fiber.Map'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_faridlan_inventory-api_internal_delivery_http_dto.ProductResponse'
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+      summary: Menambahkan produk baru
+      tags:
+      - Products
+  /api/products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Menghapus data produk berdasarkan ID. Data tidak benar-benar dihapus
+        dari database (Soft Delete).
+      parameters:
+      - description: Product ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/fiber.Map'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+      summary: Menghapus produk
+      tags:
+      - Products
+    get:
+      consumes:
+      - application/json
+      description: Mengambil data spesifik satu produk berdasarkan ID (UUID)
+      parameters:
+      - description: Product ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/fiber.Map'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_faridlan_inventory-api_internal_delivery_http_dto.ProductResponse'
+                message:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+      summary: Mendapatkan detail produk
+      tags:
+      - Products
+    patch:
+      consumes:
+      - application/json
+      description: Memperbarui hanya status ketersediaan (is_available) dari sebuah
+        produk. Sangat berguna untuk efisiensi payload dari Frontend.
+      parameters:
+      - description: Product ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Payload Patch Status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_faridlan_inventory-api_internal_delivery_http_dto.PatchProductsIdJSONBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/fiber.Map'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+      summary: Mengubah status ketersediaan produk (Partial Update)
+      tags:
+      - Products
+    put:
+      consumes:
+      - application/json
+      description: Memperbarui seluruh data produk pakaian secara utuh berdasarkan
+        ID (UUID)
+      parameters:
+      - description: Product ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Payload Update Produk
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_faridlan_inventory-api_internal_delivery_http_dto.ProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/fiber.Map'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_faridlan_inventory-api_internal_delivery_http_dto.ProductResponse'
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+      summary: Mengubah seluruh data produk (Replace)
+      tags:
+      - Products
+swagger: "2.0"
