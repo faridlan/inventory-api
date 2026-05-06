@@ -13,6 +13,7 @@ import (
 	"github.com/joho/godotenv"
 
 	// Sesuaikan import path ini dengan struktur folder Anda
+	"github.com/faridlan/inventory-api/docs"
 	_ "github.com/faridlan/inventory-api/docs"
 	"github.com/faridlan/inventory-api/internal/config"
 	myHttp "github.com/faridlan/inventory-api/internal/delivery/http" // Alias untuk folder http
@@ -63,6 +64,11 @@ func main() {
 
 	dbURL := os.Getenv("DB_URL")
 	config.RunDBMigration(dbURL)
+
+	swaggerHost := os.Getenv("SWAGGER_HOST")
+	if swaggerHost != "" {
+		docs.SwaggerInfo.Host = swaggerHost
+	}
 
 	// ==========================================
 	// 4. SETUP FIBER APP & MIDDLEWARE
