@@ -125,3 +125,11 @@ func (u *productUsecase) Delete(ctx context.Context, id string) error {
 
 	return nil
 }
+
+func (u *productUsecase) ResetDefault(ctx context.Context) error {
+	err := u.productRepo.ResetDefault(ctx)
+	if err != nil {
+		return domain.NewError(domain.ErrInternalServerError, "Gagal melakukan reset data default")
+	}
+	return nil
+}
