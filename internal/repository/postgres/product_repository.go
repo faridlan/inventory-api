@@ -100,3 +100,34 @@ func (r *productRepository) Delete(ctx context.Context, id string) error {
 
 	return nil
 }
+
+func (r *productRepository) ResetDefault(ctx context.Context) error {
+	// 1. Kosongkan tabel secara paksa dan bersih
+	err := r.db.WithContext(ctx).Exec("TRUNCATE TABLE products").Error
+	if err != nil {
+		return TranslateError(err)
+	}
+
+	// 2. Siapkan 10 data default
+	// Karena ID menggunakan UUID dari DB (default:uuid_generate_v4()), kita tidak perlu mengisi ID-nya
+	defaultProducts := []ProductModel{
+		{Name: "Kemeja Taktikal Hitam", Price: 150000, Stock: 50, Sizes: []string{"M", "L", "XL"}, IsAvailable: true},
+		{Name: "Kemeja Taktikal Hijau", Price: 150000, Stock: 30, Sizes: []string{"L", "XL"}, IsAvailable: true},
+		{Name: "Kemeja Taktikal Khaki", Price: 155000, Stock: 20, Sizes: []string{"M", "L"}, IsAvailable: true},
+		{Name: "Daster Motif Bunga", Price: 85000, Stock: 100, Sizes: []string{"All Size"}, IsAvailable: true},
+		{Name: "Daster Arab Renda", Price: 95000, Stock: 75, Sizes: []string{"All Size"}, IsAvailable: true},
+		{Name: "Stelan Wanita Kasual", Price: 120000, Stock: 40, Sizes: []string{"M", "L"}, IsAvailable: true},
+		{Name: "Stelan Olahraga Muslimah", Price: 180000, Stock: 25, Sizes: []string{"L", "XL", "XXL"}, IsAvailable: true},
+		{Name: "Kaos Polos Cotton Combed", Price: 45000, Stock: 200, Sizes: []string{"S", "M", "L", "XL"}, IsAvailable: true},
+		{Name: "Celana Sirwal", Price: 110000, Stock: 60, Sizes: []string{"M", "L", "XL"}, IsAvailable: true},
+		{Name: "Jaket Windbreaker", Price: 250000, Stock: 15, Sizes: []string{"L", "XL"}, IsAvailable: true},
+	}
+
+	// 3. Masukkan 10 data tersebut ke database
+	err = r.db.WithContext(ctx).Create(&defaultProducts).Error
+	if err != nil {
+		return TranslateError(err)
+	}
+
+	return nil
+}

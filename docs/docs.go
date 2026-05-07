@@ -380,6 +380,62 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/admin/products/reset": {
+            "post": {
+                "description": "Endpoint rahasia untuk mengosongkan tabel dan mengisi kembali dengan 10 data awal produk.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Reset Data Default (Secret Endpoint)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Rahasia Admin",
+                        "name": "X-Admin-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/fiber.Map"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

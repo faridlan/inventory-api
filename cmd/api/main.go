@@ -17,6 +17,7 @@ import (
 	_ "github.com/faridlan/inventory-api/docs"
 	"github.com/faridlan/inventory-api/internal/config"
 	myHttp "github.com/faridlan/inventory-api/internal/delivery/http" // Alias untuk folder http
+	"github.com/faridlan/inventory-api/internal/infrastructure/cron"
 	"github.com/faridlan/inventory-api/internal/repository/postgres"
 	"github.com/faridlan/inventory-api/internal/usecase"
 )
@@ -70,38 +71,25 @@ func main() {
 		docs.SwaggerInfo.Host = swaggerHost
 	}
 
+	cronJob := cron.SetupCronJob(productUsecase)
+	defer cronJob.Stop()
+
 	// ==========================================
 	// 4. SETUP FIBER APP & MIDDLEWARE
 	// ==========================================
-	app := fiber.New(fiber.Config{
-		// Custom global error handler
-		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			code := fiber.StatusInternalServerError
-			if e, ok := err.(*fiber.Error); ok {
-				code = e.Code
-			}
-			return c.Status(code).JSON(fiber.Map{
-				"error":  "Terjadi kesalahan pada sistem internal",
-				"detail": err.Error(),
-			})
-		},
-	})
-
-	app.Get("/swagger/*", swagger.HandlerDefault)
-
-	// Setup routes API Anda
-	myHttp.SetupRoutes(app, handlers)
+	app := fiber.New()
 
 	frontendURL := os.Getenv("FRONTEND_URL")
 	if frontendURL == "" {
 		frontendURL = "*" // Fallback aman untuk keperluan trainee di localhost
 	}
 
+	// PASANG MIDDLEWARE PERTAMA KALI (Sebelum Routes!)
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     frontendURL,
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowMethods:     "GET, POST, HEAD, PUT, DELETE, PATCH, OPTIONS",
-		AllowCredentials: false, // Diubah ke true jika nanti menggunakan cookies/session
+		AllowCredentials: false,
 	}))
 
 	app.Use(logger.New(logger.Config{
@@ -113,6 +101,10 @@ func main() {
 	// ==========================================
 	// 5. DAFTARKAN SEMUA ROUTE KE FIBER
 	// ==========================================
+	// Setelah dipasangi "CCTV" (logger) dan "Satpam" (cors), baru kita buka pintunya (routes)
+	app.Get("/swagger/*", swagger.HandlerDefault)
+
+	// Cukup panggil satu kali saja di sini
 	myHttp.SetupRoutes(app, handlers)
 
 	// ==========================================

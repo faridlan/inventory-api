@@ -318,4 +318,39 @@ paths:
       summary: Mengubah seluruh data produk (Replace)
       tags:
       - Products
+  /api/v1/admin/products/reset:
+    post:
+      consumes:
+      - application/json
+      description: Endpoint rahasia untuk mengosongkan tabel dan mengisi kembali dengan
+        10 data awal produk.
+      parameters:
+      - description: Token Rahasia Admin
+        in: header
+        name: X-Admin-Token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/fiber.Map'
+            - properties:
+                message:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_faridlan_inventory-api_internal_utils.ErrorResponse'
+      summary: Reset Data Default (Secret Endpoint)
+      tags:
+      - Admin
 swagger: "2.0"
