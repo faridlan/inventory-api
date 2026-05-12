@@ -36,6 +36,7 @@ type ProductRepository interface {
 	Update(ctx context.Context, product *Product) error
 	PatchAvailability(ctx context.Context, id string, isAvailable bool) error
 	Delete(ctx context.Context, id string) error
+	ResetDefault(ctx context.Context) error
 }
 
 // ProductUsecase adalah kontrak untuk layer Business Logic.
@@ -47,4 +48,5 @@ type ProductUsecase interface {
 	Update(ctx context.Context, id string, input *ProductInput) (Product, error)
 	PatchAvailability(ctx context.Context, id string, isAvailable bool) error
 	Delete(ctx context.Context, id string) error
+	ResetDefault(ctx context.Context) error
 }

@@ -184,3 +184,38 @@ func TestProductUsecase_Delete(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
+
+func TestProductUsecase_ResetDefault(t *testing.T) {
+	mockRepo := new(mocks.ProductRepository)
+	uc := usecase.NewProductUsecase(mockRepo)
+	ctx := context.Background()
+
+	t.Run("Sukses reset data default", func(t *testing.T) {
+		mockRepo.ExpectedCalls = nil // Reset status mock
+
+		// Ekspektasi: Repository mengembalikan nil (sukses)
+		mockRepo.On("ResetDefault", ctx).Return(nil).Once()
+
+		err := uc.ResetDefault(ctx)
+
+		// Assert: Pastikan tidak ada error yang bocor ke atas
+		assert.NoError(t, err)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("Gagal reset data - Error dari Repository", func(t *testing.T) {
+		mockRepo.ExpectedCalls = nil
+
+		// Ekspektasi: Repository mengalami error (misal koneksi DB terputus)
+		mockRepo.On("ResetDefault", ctx).Return(errors.New("database timeout")).Once()
+
+		err := uc.ResetDefault(ctx)
+
+		// Assert: Pastikan mengeluarkan error
+		assert.Error(t, err)
+
+		// Assert: Pastikan error aslinya sudah dibungkus dengan baik menjadi ErrInternalServerError
+		assert.ErrorIs(t, err, domain.ErrInternalServerError)
+		mockRepo.AssertExpectations(t)
+	})
+}

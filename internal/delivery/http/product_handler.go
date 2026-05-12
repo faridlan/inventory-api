@@ -1,6 +1,8 @@
 package http
 
 import (
+	"os"
+
 	"github.com/faridlan/inventory-api/internal/delivery/http/dto"
 	"github.com/faridlan/inventory-api/internal/domain"
 	"github.com/faridlan/inventory-api/internal/utils"
@@ -268,4 +270,41 @@ func (h *productHandler) DeleteProductsId(c *fiber.Ctx) error {
 	}
 
 	return utils.SendSuccess(c, fiber.StatusOK, "Produk berhasil dihapus", nil)
+}
+
+// ResetProducts mengembalikan data ke setelan awal (default)
+// @Summary Reset Data Default (Secret Endpoint)
+// @Description Endpoint rahasia untuk mengosongkan tabel dan mengisi kembali dengan 10 data awal produk.
+// @Tags Admin
+// @Accept json
+// @Produce json
+// @Param X-Admin-Token header string true "Token Rahasia Admin"
+// @Success 200 {object} fiber.Map{message=string}
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /api/v1/admin/products/reset [post]
+func (h *productHandler) ResetProducts(c *fiber.Ctx) error {
+	// 1. Ambil token dari header request
+	adminToken := c.Get("X-Admin-Token")
+
+	// 2. Ambil token asli dari environment variable (VM Azure Anda)
+	secretKey := os.Getenv("ADMIN_SECRET_TOKEN")
+
+	// Jika di .env belum diset, kita beri fallback sementara
+	if secretKey == "" {
+		secretKey = "rahasia-mentor-123"
+	}
+
+	// 3. Validasi Token
+	if adminToken != secretKey {
+		return utils.SendError(c, fiber.StatusUnauthorized, "Akses ditolak: Token admin tidak valid")
+	}
+
+	// 4. Eksekusi Reset
+	err := h.productUsecase.ResetDefault(c.Context())
+	if err != nil {
+		return utils.HandleDomainError(c, err)
+	}
+
+	return utils.SendSuccess(c, fiber.StatusOK, "Data produk berhasil direset ke setelan pabrik secara manual", nil)
 }

@@ -38,4 +38,5 @@ type ServerInterface interface {
 	GetProductsId(c *fiber.Ctx) error
 	PatchProductsId(c *fiber.Ctx) error
 	PutProductsId(c *fiber.Ctx) error
+	ResetProducts(c *fiber.Ctx) error
 }

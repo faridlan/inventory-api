@@ -37,4 +37,12 @@ func SetupRoutes(app *fiber.App, h AppHandlers) {
 	products.Put("/:id", h.Product.PutProductsId)
 	products.Patch("/:id", h.Product.PatchProductsId)
 	products.Delete("/:id", h.Product.DeleteProductsId)
+
+	// ==========================================
+	// ADMIN ROUTES (Endpoint Rahasia)
+	// ==========================================
+	admin := api.Group("/admin")
+
+	// Hanya Anda yang tahu cara mengakses ini
+	admin.Post("/products/reset", h.Product.ResetProducts)
 }
